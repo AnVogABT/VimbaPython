@@ -26,6 +26,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import copy
+import os
 from datetime import datetime
 import cv2
 import threading
@@ -35,11 +36,22 @@ import numpy
 from typing import Optional
 from vimba import *
 
-
+# default variables
 FRAME_QUEUE_SIZE = 10
 FRAME_HEIGHT = 4608
 FRAME_WIDTH = 5328
 
+##############
+# user inputs
+##############
+
+folder_path_out = r"Path of the output folder of the frames"
+# define the extenction of the frames
+image_extension = 'bmp' # 'bmp', 'jpg'
+
+###############
+# functionality
+###############
 
 def print_preamble():
     print('////////////////////////////////////////////')
@@ -156,7 +168,7 @@ class FrameProducer(threading.Thread):
             self.log.info('Camera {}: Failed to set Feature \'ExposureAuto\'.'.format(
                           self.cam.get_id()))
 
-        self.cam.set_pixel_format(PixelFormat.Mono8)
+        self.cam.set_pixel_format(PixelFormat.Mono8) # or Bgr8 for color camera
 
     def run(self):
         self.log.info('Thread \'FrameProducer({})\' started.'.format(self.cam.get_id()))
@@ -224,8 +236,9 @@ class FrameConsumer(threading.Thread):
                 image_copy = cv2.resize(concat_im, (int(concat_im.shape[1]/resize_factor), int(concat_im.shape[0]/resize_factor)))
 
                 cv2.imshow(IMAGE_CAPTION, image_copy)
-                stamp = datetime.timestamp(datetime.now())
-                cv2.imwrite(f"C:\\Users\\a.vogiatzis\\Desktop\\2022-07-26 DC2 Fokker Park\\mono\\{stamp}.bmp", concat_im)
+                timestampt = datetime.timestamp(datetime.now())
+                output_file = os.path.join(folder_path_out, '{}.{}'.format(timestampt, image_extension))
+                cv2.imwrite(output_file, concat_im)
 
             # If there are no frames available, show dummy image instead
             else:

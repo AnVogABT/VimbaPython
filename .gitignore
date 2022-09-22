@@ -10,6 +10,7 @@
 *.shx
 *.cpg
 *.vrt
+*.xml
 tiff_examples/
 data/backup/
 src/Jupyter Notebook/
